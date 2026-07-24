@@ -22,8 +22,8 @@ const {
 router.get("/", getAllReviewsController);
 router.post("/", validateRequest(createReviewSchema), createReviewsController);
 router.put("/:id", validateRequest(updateReviewSchema), updateReviewsController);
-router.patch("/:id/approve", updateReviewsApproveController);
-router.patch("/:id/reject", validateRequest(rejectReviewSchema), updateReviewsRejectController);
+router.post("/:id/approve", updateReviewsApproveController);
+router.post("/:id/reject", validateRequest(rejectReviewSchema), updateReviewsRejectController);
 router.delete("/:id", deleteReviewsController);
 router.get("/flagged", getAllScoreController);
 

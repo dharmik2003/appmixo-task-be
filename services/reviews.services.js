@@ -3,21 +3,21 @@ const generateRiskScore = require("../utils");
 
 const createReviewsService = async (req, res) => {
     try {
-        const {
-            text,
-            rating,
+        const { text, rating, author, productId } = req.body;
+
+        const { riskScore, flags } = await generateRiskScore(text, {
+            ReviewsModel: Reviews,
             author,
             productId
-        } = req.body;
-
-        const riskScore = generateRiskScore(text);
+        });
 
         const reviews = await Reviews.create({
             text,
             rating,
             author,
             productId,
-            riskScore
+            riskScore,
+            flags
         });
 
         return res.status(201).json({
@@ -76,22 +76,24 @@ const getAllReviewsService = async (req, res) => {
 
 const updateReviewsService = async (req, res) => {
     try {
-        const riskScore = generateRiskScore(req.body.text);
-        const data = {
-            ...req.body,
-            riskScore
-        };
+        let updateData = { ...req.body };
+
+        if (req.body.text) {
+            const { riskScore, flags } = await generateRiskScore(req.body.text, {
+                ReviewsModel: Reviews,
+                author: req.body.author,
+                productId: req.body.productId,
+                excludeReviewId: req.params.id
+            });
+
+            updateData.riskScore = riskScore;
+            updateData.flags = flags;
+        }
 
         const reviews = await Reviews.findOneAndUpdate(
-            {
-                _id: req.params.id,
-            },
-            {
-                $set: data
-            },
-            {
-                new: true
-            }
+            { _id: req.params.id },
+            { $set: updateData },
+            { new: true }
         );
 
         if (!reviews) {
@@ -116,7 +118,6 @@ const updateReviewsService = async (req, res) => {
         });
     }
 };
-
 
 const updateReviewsApproveService = async (req, res) => {
     try {
@@ -162,7 +163,7 @@ const updateReviewsRejectService = async (req, res) => {
             },
             {
                 $set: {
-                    status: "reject",
+                    status: "rejected",
                     rejectReason: reason || null
                 }
             },

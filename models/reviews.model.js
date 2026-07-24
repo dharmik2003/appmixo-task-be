@@ -29,8 +29,12 @@ const reviewsSchema = new mongoose.Schema(
             require: true,
             min: 0, 
             max: 100 
-        },    
-           productId: {
+        },
+        flags: {
+            type: [String],
+            default: []
+        },
+        productId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Products",
             require: true
