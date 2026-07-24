@@ -1,4 +1,5 @@
 const Reviews = require("../models/reviews.model");
+const generateRiskScore = require("../utils");
 
 const createReviewsService = async (req, res) => {
     try {
@@ -9,24 +10,15 @@ const createReviewsService = async (req, res) => {
             productId
         } = req.body;
 
-    let riskScore=100
-    var ban = ["word1", "word2", "word3"];
-    if(text.includes("!!!") || text.includes("???")){
-        riskScore=riskScore-10 
-    }
-    else if(text.includes(ban)){
-        riskScore=riskScore-15 
-    }
+        const riskScore = generateRiskScore(text);
 
-    console.log("riskScore",riskScore)
         const reviews = await Reviews.create({
-             text,
+            text,
             rating,
             author,
             productId,
             riskScore
         });
-
 
         return res.status(201).json({
             status: true,
@@ -54,7 +46,7 @@ const getAllReviewsService = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const reviews = await Reviews.find({
-            productId:productId
+            productId: productId
         })
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -84,23 +76,24 @@ const getAllReviewsService = async (req, res) => {
 
 const updateReviewsService = async (req, res) => {
     try {
-
-        const riskScore = generateRiskScore(req.body.text)
+        const riskScore = generateRiskScore(req.body.text);
         const data = {
             ...req.body,
             riskScore
-        }
+        };
+
         const reviews = await Reviews.findOneAndUpdate(
             {
                 _id: req.params.id,
             },
             {
-                $set: req.body
+                $set: data
             },
             {
                 new: true
             }
         );
+
         if (!reviews) {
             return res.status(404).json({
                 status: false,
@@ -108,6 +101,7 @@ const updateReviewsService = async (req, res) => {
                 data: null
             });
         }
+
         return res.status(200).json({
             status: true,
             message: "Reviews updated successfully",
@@ -126,13 +120,12 @@ const updateReviewsService = async (req, res) => {
 
 const updateReviewsApproveService = async (req, res) => {
     try {
-        console.log(" req.params.id", req.params.id)
         const reviews = await Reviews.findOneAndUpdate(
             {
                 _id: req.params.id,
             },
             {
-                $set: {status:"approve"}
+                $set: { status: "approve" }
             },
             {
                 new: true
@@ -162,12 +155,16 @@ const updateReviewsApproveService = async (req, res) => {
 
 const updateReviewsRejectService = async (req, res) => {
     try {
+        const { reason } = req.body;
         const reviews = await Reviews.findOneAndUpdate(
             {
                 _id: req.params.id,
             },
             {
-                $set: {status:"reject"}
+                $set: {
+                    status: "reject",
+                    rejectReason: reason || null
+                }
             },
             {
                 new: true
@@ -195,34 +192,34 @@ const updateReviewsRejectService = async (req, res) => {
     }
 };
 
-// const deleteReviewsService = async (req, res) => {
-//     try {
-//         const reviews = await Reviews.findOneAndDelete({
-//             _id: req.params.id,
-//         });
+const deleteReviewsService = async (req, res) => {
+    try {
+        const reviews = await Reviews.findOneAndDelete({
+            _id: req.params.id,
+        });
 
-//         if (!reviews) {
-//             return res.status(404).json({
-//                 status: false,
-//                 message: "Reviews not found",
-//                 data: null
-//             });
-//         }
+        if (!reviews) {
+            return res.status(404).json({
+                status: false,
+                message: "Reviews not found",
+                data: null
+            });
+        }
 
-//         return res.status(200).json({
-//             status: true,
-//             message: "Reviews deleted successfully",
-//             data: null
-//         });
+        return res.status(200).json({
+            status: true,
+            message: "Reviews deleted successfully",
+            data: null
+        });
 
-//     } catch (error) {
-//         return res.status(500).json({
-//             status: false,
-//             message: error.message,
-//             data: null
-//         });
-//     }
-// };
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: error.message,
+            data: null
+        });
+    }
+};
 
 const getAllScoreService = async (req, res) => {
     try {
@@ -231,8 +228,8 @@ const getAllScoreService = async (req, res) => {
         } = req.query;
 
         const reviews = await Reviews.find({
-            riskScore:{
-                $gte:score_gt
+            riskScore: {
+                $gte: score_gt
             }
         })
             .sort({ createdAt: -1 })
@@ -267,5 +264,6 @@ module.exports = {
     updateReviewsService,
     updateReviewsApproveService,
     updateReviewsRejectService,
-    getAllScoreService
+    getAllScoreService,
+    deleteReviewsService
 };

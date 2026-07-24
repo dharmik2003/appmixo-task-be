@@ -73,6 +73,17 @@ const getAllScoreController = async (req, res) => {
         });
     }
 };
+const deleteReviewsController = async (req, res) => {
+    try {
+        await reviewsService.deleteReviewsService(req, res);
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: error.message,
+            data: null
+        });
+    }
+};
 
 
 
@@ -82,5 +93,6 @@ module.exports = {
     updateReviewsController,
     updateReviewsApproveController,
     updateReviewsRejectController,
-    getAllScoreController
+    getAllScoreController,
+    deleteReviewsController
 };

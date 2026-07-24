@@ -41,7 +41,6 @@ const getAllProductsService = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));
-            console.log("products",products)
 
         const totalProducts = await Product.countDocuments();
 

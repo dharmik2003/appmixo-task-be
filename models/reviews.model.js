@@ -16,6 +16,10 @@ const reviewsSchema = new mongoose.Schema(
             type: String,
             default:"pending"
         },
+        rejectReason: {
+            type: String,
+            default: null
+        },
         author: {
             type: String,
             require: true,

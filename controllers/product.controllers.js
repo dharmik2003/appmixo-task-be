@@ -1,6 +1,5 @@
 const productService = require("../services/product.services");
 
-// Create Product
 const createProductController = async (req, res) => {
     try {
         await productService.createProductService(req, res);
@@ -14,7 +13,6 @@ const createProductController = async (req, res) => {
 };
 
 
-// Get All Products (logged-in user)
 const getAllProductsController = async (req, res) => {
     try {
         await productService.getAllProductsService(req, res);
@@ -28,7 +26,6 @@ const getAllProductsController = async (req, res) => {
 };
 
 
-// Get Single Product
 const getSingleProductController = async (req, res) => {
     try {
         await productService.getSingleProductService(req, res);
@@ -42,7 +39,6 @@ const getSingleProductController = async (req, res) => {
 };
 
 
-// Update Product
 const updateProductController = async (req, res) => {
     try {
         await productService.updateProductService(req, res);
@@ -56,7 +52,6 @@ const updateProductController = async (req, res) => {
 };
 
 
-// Delete Product
 const deleteProductController = async (req, res) => {
     try {
         await productService.deleteProductService(req, res);
